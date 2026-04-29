@@ -74,3 +74,44 @@ impl<'a> MyDbContext<'a> {
             })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rusqlite::Connection;
+
+    // a helper that sets up a fresh in-memory db for each test
+    fn setup() -> Connection {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch("
+            CREATE TABLE person (
+                id    INTEGER PRIMARY KEY,
+                name  TEXT NOT NULL,
+                email TEXT NOT NULL
+            );
+        ").unwrap();
+        conn
+    }
+
+    #[test]
+    fn test_create_and_fetch_person() {
+        let conn = setup();
+        let mut ctx = MyDbContext::new(&conn);
+
+        let id = ctx.create_person("Alice", "alice@example.com").unwrap();
+        let person = ctx.fetch_person_by_id(id as i32).unwrap();
+
+        assert_eq!(person.name, "Alice");
+        assert_eq!(person.email, "alice@example.com");
+        assert_eq!(person.id, Some(id));
+    }
+
+    #[test]
+    fn test_fetch_person_not_found() {
+        let conn = setup();
+        let mut ctx = MyDbContext::new(&conn);
+
+        let result = ctx.fetch_person_by_id(999);
+        assert!(result.is_err()); // should return an error for a missing id
+    }
+}
