@@ -1,50 +1,40 @@
-use crate::persistence::my_db_context::MyDbContext;
-use crate::persistence::person::Person;
-use rusqlite::{Connection, Error};
+mod models;
+mod persistence;
 
-pub mod persistence;
+use rusqlite::Error;
+use models::student::Student;
+use persistence::db;
+use persistence::student_repo::StudentRepo;
 
 fn main() -> Result<(), Error> {
-    let persons_to_insert: Vec<Person> = vec![
-        Person {
-            id: None,
-            name: String::from("Alice"),
-            email: String::from("alice@example.com"),
-        },
-        Person {
-            id: None,
-            name: String::from("Bob"),
-            email: String::from("bob@example.com"),
-        },
-    ];
+    // open the database - creates the file and all tables if they don't exist
+    let conn = db::open("school.db")?;
 
-    let conn: Connection = Connection::open("myfile.db")?;
-    let mut context: MyDbContext = MyDbContext::new(&conn);
-    //
-    // context.conn.execute_batch("BEGIN TRANSACTION;")?;
-    // for p in &persons_to_insert {
-    //     context.create_person(&p.name, &p.email)?;
-    // }
-    // context.conn.execute_batch("COMMIT TRANSACTION;")?;
+    // create the repo, passing in a reference to the connection
+    let mut student_repo = StudentRepo::new(&conn);
 
-    let persons: Vec<Person> = context.fetch_persons()?;
+    // create a new student using the constructor
+    let jon = Student::new("Jon".to_string(), "Doe".to_string());
+    println!("Before insert: {}", jon); // no id yet
 
-    for person in persons {
-        println!("{}", person);
+    // insert into the database, get back the new id
+    let id = student_repo.insert(&jon)?;
+    println!("Inserted with id: {}", id);
+
+    // fetch back by id
+    let fetched = student_repo.fetch_by_id(id)?;
+    println!("Fetched: {}", fetched); // now has an id
+
+    // fetch all students
+    let all = student_repo.fetch_all()?;
+    println!("Total students: {}", all.len());
+    for s in &all {
+        println!("  - {}", s);
     }
 
-    println!("----------");
-
-    let person = context.fetch_person_by_id(1);
-    match person {
-        Ok(person) => {
-            println!("{}", person);
-        }
-        
-        Err(e) => {
-            println!("{}", e);
-        }
-    }
+    // delete
+    student_repo.delete(id)?;
+    println!("Deleted student {}", id);
 
     Ok(())
 }
