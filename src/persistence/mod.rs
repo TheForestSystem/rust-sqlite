@@ -1,2 +1,7 @@
 ﻿pub mod db;
 pub mod student_repo;
+pub mod staff_repo;
+pub mod course_repo;
+pub mod assignment_repo;
+pub mod enrollment_repo;
+pub mod assignment_grade_repo;
