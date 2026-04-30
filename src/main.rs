@@ -1,5 +1,6 @@
 mod models;
 mod persistence;
+pub mod views;
 
 use crate::models::course::Course;
 use crate::models::staff::Staff;
