@@ -22,7 +22,7 @@ impl<'a> StudentRepo<'a> {
         if self.insert_stmt.is_none() {
             self.insert_stmt = Some(self.conn.prepare(
                 "
-                INSERT INTO student (student_first, student_last, student_email)
+                INSERT INTO students (student_first, student_last, student_email)
                 VALUES (:first, :last, :email)
             ",
             )?);
@@ -40,7 +40,7 @@ impl<'a> StudentRepo<'a> {
             self.fetch_by_id_stmt = Some(self.conn.prepare(
                 "
                 SELECT student_id, student_first, student_last, student_email, created_at
-                FROM student WHERE student_id = :id
+                FROM students WHERE student_id = :id
             ",
             )?);
         }
@@ -63,7 +63,7 @@ impl<'a> StudentRepo<'a> {
             self.fetch_all_stmt = Some(self.conn.prepare(
                 "
                 SELECT student_id, student_first, student_last, student_email, created_at
-                FROM student ORDER BY student_last, student_first
+                FROM students ORDER BY student_last, student_first
             ",
             )?);
         }
@@ -83,7 +83,7 @@ impl<'a> StudentRepo<'a> {
 
     pub fn delete(&mut self, id: i64) -> Result<(), Error> {
         self.conn.execute(
-            "DELETE FROM student WHERE student_id = :id",
+            "DELETE FROM students WHERE student_id = :id",
             named_params! { ":id": id },
         )?;
         Ok(())

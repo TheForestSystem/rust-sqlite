@@ -18,49 +18,49 @@ fn create_tables(conn: &Connection) -> Result<(), Error> {
     conn.execute_batch("
         CREATE TABLE IF NOT EXISTS staff (
             staff_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-            staff_first TEXT                           NOT NULL,
-            staff_last  TEXT                           NOT NULL,
-            staff_email TEXT                           NOT NULL UNIQUE,
-            staff_title TEXT                           NOT NULL,
-            created_at  TEXT DEFAULT (datetime('now')) NOT NULL
+            staff_first TEXT                                  NOT NULL,
+            staff_last  TEXT                                  NOT NULL,
+            staff_email TEXT                                  NOT NULL UNIQUE,
+            staff_title TEXT                                  NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now', 'utc')) NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS courses (
             course_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_name TEXT                           NOT NULL UNIQUE,
-            staff_id    INTEGER                        NOT NULL REFERENCES staff,
-            created_at  TEXT DEFAULT (datetime('now')) NOT NULL
+            course_name TEXT                                  NOT NULL UNIQUE,
+            staff_id    INTEGER                               NOT NULL REFERENCES staff,
+            created_at  TEXT DEFAULT (datetime('now', 'utc')) NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS assignments (
             assignment_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_id       INTEGER                        NOT NULL REFERENCES courses,
-            assignment_name TEXT                           NOT NULL,
-            weight          REAL    DEFAULT 1.0            NOT NULL,
-            created_at      TEXT    DEFAULT (datetime('now')) NOT NULL
+            course_id       INTEGER                               NOT NULL REFERENCES courses,
+            assignment_name TEXT                                  NOT NULL,
+            weight          REAL    DEFAULT 1.0                   NOT NULL,
+            created_at      TEXT    DEFAULT (datetime('now', 'utc')) NOT NULL
         );
 
-        CREATE TABLE IF NOT EXISTS student (
+        CREATE TABLE IF NOT EXISTS students (
             student_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_first TEXT                           NOT NULL,
-            student_last  TEXT                           NOT NULL,
-            student_email TEXT                           NOT NULL UNIQUE,
-            created_at    TEXT DEFAULT (datetime('now')) NOT NULL
+            student_first TEXT                                  NOT NULL,
+            student_last  TEXT                                  NOT NULL,
+            student_email TEXT                                  NOT NULL UNIQUE,
+            created_at    TEXT DEFAULT (datetime('now', 'utc')) NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS enrollments (
             enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id    INTEGER                        NOT NULL REFERENCES student,
-            course_id     INTEGER                        NOT NULL REFERENCES courses,
-            enrolled_at   TEXT DEFAULT (datetime('now')) NOT NULL,
+            student_id    INTEGER                               NOT NULL REFERENCES students,
+            course_id     INTEGER                               NOT NULL REFERENCES courses,
+            enrolled_at   TEXT DEFAULT (datetime('now', 'utc')) NOT NULL,
             CONSTRAINT enrollments_uk UNIQUE (student_id, course_id)
         );
 
         CREATE TABLE IF NOT EXISTS assignment_grades (
-            enrollment_id INTEGER                        NOT NULL REFERENCES enrollments,
-            assignment_id INTEGER                        NOT NULL REFERENCES assignments,
-            grade         REAL    DEFAULT 0              NOT NULL,
-            graded_at     TEXT    DEFAULT (datetime('now')) NOT NULL,
+            enrollment_id INTEGER                               NOT NULL REFERENCES enrollments,
+            assignment_id INTEGER                               NOT NULL REFERENCES assignments,
+            grade         REAL    DEFAULT 0                     NOT NULL,
+            graded_at     TEXT    DEFAULT (datetime('now', 'utc')) NOT NULL,
             CONSTRAINT assignment_grades_pk PRIMARY KEY (enrollment_id, assignment_id)
         );
 
@@ -86,7 +86,7 @@ fn create_tables(conn: &Connection) -> Result<(), Error> {
                ROUND(SUM(ag.grade * a.weight) / SUM(a.weight), 2) AS final_grade,
                COUNT(ag.assignment_id)                   AS assignments_graded
         FROM enrollments e
-                 JOIN student s ON s.student_id = e.student_id
+                 JOIN students s ON s.student_id = e.student_id
                  JOIN courses c ON c.course_id = e.course_id
                  JOIN staff st ON st.staff_id = c.staff_id
                  JOIN assignment_grades ag ON ag.enrollment_id = e.enrollment_id
@@ -99,7 +99,7 @@ fn create_tables(conn: &Connection) -> Result<(), Error> {
                c.course_name,
                a.assignment_name
         FROM enrollments e
-                 JOIN student s ON s.student_id = e.student_id
+                 JOIN students s ON s.student_id = e.student_id
                  JOIN courses c ON c.course_id = e.course_id
                  JOIN assignments a ON a.course_id = e.course_id
                  LEFT JOIN assignment_grades ag
