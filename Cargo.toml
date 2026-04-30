@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 rusqlite = { version = "0.39.0", features = ["chrono", "bundled"] }
 chrono = "0.4.44"
+inquire = "0.7.5"
+crossterm = "0.25.0"
