@@ -1,17 +1,16 @@
 ﻿use std::fmt;
 use chrono::{DateTime, Utc};
-use crate::models::course::Course;
-use crate::models::student::Student;
 
 pub struct Enrollment {
     pub enrollment_id: Option<i64>,
-    pub student: Student,
-    pub course: Course,
-    pub created_at: Option<DateTime<Utc>>,
+    pub student_id: i64,       // just the foreign key
+    pub course_id: i64,        // just the foreign key
+    pub enrolled_at: Option<DateTime<Utc>>,
 }
 
 impl fmt::Display for Enrollment {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} is enrolled in {}", self.student.full_name(), self.course.course_name)
+        write!(f, "Enrollment #{:?} - Student {} in Course {}",
+               self.enrollment_id, self.student_id, self.course_id)
     }
 }
