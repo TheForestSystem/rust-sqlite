@@ -6,3 +6,4 @@ pub mod assignment_repo;
 pub mod enrollment_repo;
 pub mod assignment_grade_repo;
 pub mod context;
+pub mod view_repo;
