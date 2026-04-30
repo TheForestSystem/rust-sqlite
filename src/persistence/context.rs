@@ -8,6 +8,7 @@ use crate::persistence::{
     enrollment_repo::EnrollmentRepo,
     assignment_grade_repo::AssignmentGradeRepo
 };
+use crate::persistence::view_repo::ViewRepo;
 
 pub struct DbContext<'a> {
     pub staff:            StaffRepo<'a>,
@@ -15,7 +16,8 @@ pub struct DbContext<'a> {
     pub courses:          CourseRepo<'a>,
     pub assignments:      AssignmentRepo<'a>,
     pub enrollments:      EnrollmentRepo<'a>,
-    pub assignment_grades: AssignmentGradeRepo<'a>
+    pub assignment_grades: AssignmentGradeRepo<'a>,
+    pub views: ViewRepo<'a>,
 }
 
 impl<'a> DbContext<'a> {
@@ -26,7 +28,8 @@ impl<'a> DbContext<'a> {
             courses:           CourseRepo::new(conn),
             assignments:       AssignmentRepo::new(conn),
             enrollments:       EnrollmentRepo::new(conn),
-            assignment_grades: AssignmentGradeRepo::new(conn)
+            assignment_grades: AssignmentGradeRepo::new(conn),
+            views:           ViewRepo::new(conn),
         }
     }
 }

@@ -1,5 +1,6 @@
 mod models;
 mod persistence;
+pub mod views;
 
 use crossterm::{cursor, execute, terminal};
 use inquire::Select;
